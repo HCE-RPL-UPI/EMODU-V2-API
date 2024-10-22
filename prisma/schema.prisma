@@ -1,0 +1,201 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(uuid())
+  email             String   @unique
+  fullname          String?
+  password          String
+  avatar            String?
+  isVerified        Boolean  @default(false)
+  verificationToken String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // avatar
+  medias        Media[]
+  classes       Class[]
+  recognitions  Recognition[]
+  comments      Comment[]
+  participants  MeetingParticipant[]
+  members       Member[]
+  notifications Notification[]
+  meetings      Meeting[]
+}
+
+model Media {
+  id        String   @id @default(uuid())
+  title     String
+  type      String
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // user
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Class {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  classCode   String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // user
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  meetings   Meeting[]
+  classPosts ClassPost[]
+  members    Member[]
+}
+
+model Meeting {
+  id          String   @id @default(uuid())
+  meetingCode String
+  name        String
+  subject     String
+  description String
+  link        String
+  isStarted   Boolean  @default(false)
+  isEnded     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  createdBy String
+  user      User   @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  classId String
+  class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  participants MeetingParticipant[]
+  
+}
+
+model Recognition {
+  id          String @id @default(uuid())
+  meetingCode String
+  neutral     Float
+  happy       Float
+  sad         Float
+  angry       Float
+  fearful     Float
+  disgusted   Float
+  surprised   Float
+  predict     String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  message   String
+  rating    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ClassPost {
+  id        String   @id @default(uuid())
+  title     String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  classId String
+  class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  comments Comment[]
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String   @db.Text()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parentId String?
+  parent   Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+
+  replies Comment[] @relation("CommentReplies")
+
+  classPostId String
+  classPost   ClassPost @relation(fields: [classPostId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Material {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  url         String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum Role {
+  TEACHER
+  STUDENT
+}
+
+model Member {
+  id     String   @id @default(uuid())
+  joinAt DateTime @default(now())
+  role   Role     @default(STUDENT)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  classId String
+  class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+}
+
+model MeetingParticipant {
+  id     String    @id @default(uuid())
+  joinAt DateTime  @default(now())
+  leftAt DateTime?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  meetingId String
+  meeting   Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, meetingId])
+}
+
+model Notification {
+  id      String  @id @default(uuid())
+  message String
+  isRead  Boolean @default(false)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// model TextInterventionLog {
+
+// }
