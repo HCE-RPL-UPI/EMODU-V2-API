@@ -83,10 +83,11 @@ export class AuthService {
 
   async login(user: User) {
     const payload = { email: user.email, sub: user.id };
-    console.log(
-      'JWT_SECRET in AuthService:',
-      this.configService.get<string>('JWT_SECRET'),
-    );
+    console.log('payload:', payload);
+    // console.log(
+    //   'JWT_SECRET in AuthService:',
+    //   this.configService.get<string>('JWT_SECRET'),
+    // );
 
     return {
       access_token: this.jwtService.sign(payload),

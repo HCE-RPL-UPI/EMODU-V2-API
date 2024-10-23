@@ -33,6 +33,52 @@ model User {
   members       Member[]
   notifications Notification[]
   meetings      Meeting[]
+
+  // emotion logs
+  affectiveTextLogs AffectiveTextLog[]
+}
+
+model AffectiveTextLog {
+  id     Int    @id @default(autoincrement())
+  textId Int
+  text  String
+  emotionId Int
+  emotion EmotionEnum
+  category String
+  emotionValue Float
+  
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum EmotionEnum {
+  SAD
+  ANGRY
+  FEAR
+  DISGUST
+}
+
+model Emotion {
+  id      Int                 @id @default(autoincrement())
+  emotion EmotionEnum
+
+  interventions AffectiveInterventionTextARCS[]
+}
+
+model AffectiveInterventionTextARCS {
+  id           Int      @id @default(autoincrement())
+  text         String
+  attention    Boolean? @default(false)
+  relevance    Boolean? @default(false)
+  confidence   Boolean? @default(false)
+  satisfaction Boolean? @default(false)
+  positive     Boolean? @default(false)
+  negative     Boolean? @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt @default(now())
+
+  emotionId Int
+  emotion   Emotion @relation(fields: [emotionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Media {
@@ -76,7 +122,7 @@ model Meeting {
   isEnded     Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   createdBy String
   user      User   @relation(fields: [createdBy], references: [id], onDelete: Cascade)
 
@@ -84,7 +130,6 @@ model Meeting {
   class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
 
   participants MeetingParticipant[]
-  
 }
 
 model Recognition {
