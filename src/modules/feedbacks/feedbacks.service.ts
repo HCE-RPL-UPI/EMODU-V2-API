@@ -7,9 +7,18 @@ export class FeedbacksService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createFeedback(data: CreateFeedbackDto) {
-    return await this.prisma.feedback.create({
+    const feedback = await this.prisma.feedback.create({
       data,
     });
+
+    return {
+      success: true,
+      message: 'Feedback created successfully',
+      data: feedback
+    };
+    // return await this.prisma.feedback.create({
+    //   data,
+    // });
   }
 
   async findAll() {
