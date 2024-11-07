@@ -1,12 +1,14 @@
-import { ApiProperty, PartialType } from "@nestjs/swagger";
+import { ApiOperation, ApiProperty, PartialType } from "@nestjs/swagger";
 import { CreateMeetingDto } from "./create-meeting.dto";
 import { IsNotEmpty } from "class-validator";
 
 export class AddParticipantDto  {
 
+  meetingId: string;
+
   @ApiProperty()
   @IsNotEmpty()
-  meetingId: string;
+  meetingCode: string
 
   @ApiProperty()
   @IsNotEmpty()
