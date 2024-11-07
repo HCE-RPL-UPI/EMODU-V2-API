@@ -46,6 +46,9 @@ model AffectiveTextLog {
   emotion EmotionEnum
   category String
   emotionValue Float
+
+  createdAt DateTime @default(now())
+  
   
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -56,6 +59,8 @@ enum EmotionEnum {
   ANGRY
   FEAR
   DISGUST
+  HAPPY
+  NEUTRAL
 }
 
 model Emotion {
@@ -99,6 +104,7 @@ model Class {
   name        String
   description String
   classCode   String   @unique
+  defaultMeetingLink String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -113,13 +119,16 @@ model Class {
 
 model Meeting {
   id          String   @id @default(uuid())
-  meetingCode String
+  meetingCode String  @unique
   name        String
   subject     String
   description String
   link        String
   isStarted   Boolean  @default(false)
+  isRecognitionStarted Boolean @default(false)
+  isRecognitionEnded   Boolean @default(false)
   isEnded     Boolean  @default(false)
+  startedAt   DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -156,7 +165,7 @@ model Feedback {
   name      String
   email     String
   message   String
-  rating    Int
+  rating    Float
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -240,7 +249,3 @@ model Notification {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
-
-// model TextInterventionLog {
-
-// }
