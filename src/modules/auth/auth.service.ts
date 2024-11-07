@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/services/prisma/prisma.service';
 import { AuthDto } from './dto/auth.dto';
 import * as crypto from 'crypto';
+import { createSuccessFetchResponse } from 'src/utils/response.utils';
 // import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
@@ -41,8 +42,6 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(payload.password, 10);
 
     const verificationToken = crypto.randomBytes(32).toString('hex');
-
-    // await 
 
     return this.prisma.user.create({
       data: {
@@ -104,7 +103,11 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    return user;
+    return {
+      success: true,
+      message: 'User profile',
+      data: user,
+    };
   }
 
  

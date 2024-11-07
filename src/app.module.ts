@@ -12,6 +12,7 @@ import { ArcsModule } from './modules/arcs/arcs.module';
 import { FeedbacksModule } from './modules/feedbacks/feedbacks.module';
 import { WebsocketGateway } from './services/websocket/websocket.gateway';
 import { AffectiveInterventionTextModule } from './modules/affective-intervention-text/affective-intervention-text.module';
+import { ValenceArousalModule } from './modules/valence-arousal/valence-arousal.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AffectiveInterventionTextModule } from './modules/affective-interventio
     ArcsModule,
     FeedbacksModule,
     AffectiveInterventionTextModule,
+    ValenceArousalModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, GoogleSheetService, WebsocketGateway],
