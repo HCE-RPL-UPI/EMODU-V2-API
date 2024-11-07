@@ -1,8 +1,13 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateClassDto } from './dto/create-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { PrismaService } from 'src/services/prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
+import { createSuccessFetchResponse } from 'src/utils/response.utils';
 @Injectable()
 export class ClassService {
   constructor(private prisma: PrismaService) {}
@@ -44,7 +49,6 @@ export class ClassService {
       throw new NotFoundException('Class not found');
     }
 
-    
     const checkMember = await this.prisma.member.findFirst({
       where: {
         userId: payload.userId,
@@ -73,16 +77,135 @@ export class ClassService {
     // return `This action joins a class`;
   }
 
-  findAll() {
-    return `This action returns all class`;
+  async findAll(userId: string, filter?: string) {
+    // filter by all, owned, joined
+    console.log(filter);
+    if (filter === 'owned') {
+      const ownedClasses = await this.prisma.class.findMany({
+        where: {
+          userId,
+        },
+        include:{
+          user: {
+            select: {
+              fullname: true,
+              email: true,
+              avatar: true,
+            },
+          },
+        }
+      });
+
+      return createSuccessFetchResponse({
+        message: 'Owned classes fetched successfully',
+        totalCount: ownedClasses.length,
+        data: ownedClasses,
+      });
+    }
+
+    if (filter === 'joined') {
+      const joinedClasses = await this.prisma.member.findMany({
+        where: {
+          userId,
+        },
+        include: {
+          class: {
+            include: {
+              user: {
+                select: {
+                  fullname: true,
+                  email: true,
+                  avatar: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      return createSuccessFetchResponse({
+        message: 'Joined classes fetched successfully',
+        totalCount: joinedClasses.length,
+        data: joinedClasses,
+      });
+    }
+    // return `This action returns all class`;
+    const classes = await this.prisma.class.findMany({
+      where: {
+        // userId,
+        members: {
+          some: {
+            userId,
+          },
+        },
+      },
+      include: {
+        user: {
+          select:{
+            fullname: true,
+            email: true,
+            avatar: true,
+          }
+        },
+      },
+      
+    });
+
+    if (!classes) {
+      throw new NotFoundException('No class found');
+    }
+
+    return createSuccessFetchResponse({
+      message: 'All classes fetched successfully',
+      totalCount: classes.length,
+      data: classes,
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} class`;
+  async findOne(id: string) {
+    const findClass = await this.prisma.class.findUnique({
+      where: {
+        id,
+      },
+      include:{
+        meetings: true,
+      }
+    });
+
+    if (!findClass) {
+      throw new NotFoundException('Class not found');
+    }
+
+    return {
+      success: true,
+      message: 'Class fetched successfully',
+      data: findClass,
+    }
+    // return `This action returns a #${id} class`;
   }
 
-  update(id: number, updateClassDto: UpdateClassDto) {
-    return `This action updates a #${id} class`;
+  async update(id: string, updateClassDto: UpdateClassDto) {
+    const findClass = await this.prisma.class.findUnique({
+      where: {
+        id,
+      }
+    });
+
+    if (!findClass) {
+      throw new NotFoundException('Class not found');
+    }
+
+    const updateClass = await this.prisma.class.update({
+      where: {
+        id,
+      },
+      data: updateClassDto,
+    });
+
+    return {
+      message: 'Class updated successfully',
+      data: updateClass,
+    }
   }
 
   remove(id: number) {
