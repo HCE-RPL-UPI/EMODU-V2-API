@@ -19,19 +19,19 @@ export class AffectiveInterventionTextController {
 
   @Get('random')
   @UseGuards(AuthGuard('jwt'))
-  @ApiQuery({ name: 'filter', required: false })
-  @ApiQuery({ name: 'category', required: false })
-  @ApiQuery({ name: 'name', required: false })
+  // @ApiQuery({ name: 'filter', required: false })
+  // @ApiQuery({ name: 'category', required: false })
+  // @ApiQuery({ name: 'name', required: false })
   async getRandomAffectiveInterventionText(
     @Request() req,
-    @Query('filter') filter?: string,
+    @Query('emotion') emotion?: string,
     @Query('category') category?: string,
     @Query('name') name?: string,
     @Query('emotionValue') emotionValue?: number,
   ) {
     const user = req.user;
     return await this.affectiveInterventionTextService.getRandomAffectiveInterventionText(
-      filter,
+      emotion,
       category,
       name,
       emotionValue,
@@ -49,5 +49,11 @@ export class AffectiveInterventionTextController {
   @UseGuards(AuthGuard('jwt'))
   async getAggregatedAffectiveInterventionTextByUser(@Request() req, @Query('userId') userId: string) {
     return await this.affectiveInterventionTextService.getAggregatedAffectiveInterventionTextByUser(userId);
+  }
+
+  @Get('aggregated-user/by-arcs/:userId')
+  @UseGuards(AuthGuard('jwt'))
+  async getAggregatedAffectiveInterventionTextByUserByARCS(@Request() req, @Query('userId') userId: string) {
+    return await this.affectiveInterventionTextService.getAggregatedAffectiveInterventionTextByUserARCS(userId);
   }
 }
