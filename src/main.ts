@@ -11,7 +11,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: '*' 
+    // origin: '*' 
+    origin:[
+      'http://localhost:3000', // <-- development frontend
+      'http://localhost:3001', // <-- development frontend
+      'chrome-extension://lingiapgkicdbiacmldhkpnlocmoicif', // <-- chrome extension
+    ]
   });
   app.useGlobalPipes(new ValidationPipe());
 

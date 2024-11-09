@@ -9,8 +9,14 @@ import {
 import { Server, Socket } from 'socket.io';
 @WebSocketGateway({
   cors: {
-    origin: '*', // Configure CORS options here
+    origin: [
+      'http://localhost:3000', // <-- development frontend
+      'http://localhost:3001', // <-- development frontend
+      'chrome-extension://lingiapgkicdbiacmldhkpnlocmoicif', // <-- chrome extension
+    ], // Configure CORS options here
+    credentials : true
   },
+  transports: ['websocket', 'polling'],
 })
 export class WebsocketGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
