@@ -117,6 +117,12 @@ model Class {
   members    Member[]
 }
 
+enum AvailableRecognitionModel {
+  NONE
+  FACE_API
+  EMOVALARO
+}
+
 model Meeting {
   id          String   @id @default(uuid())
   meetingCode String  @unique
@@ -128,6 +134,7 @@ model Meeting {
   isRecognitionStarted Boolean @default(false)
   isRecognitionEnded   Boolean @default(false)
   isEnded     Boolean  @default(false)
+  selectedRecognitionModel AvailableRecognitionModel @default(NONE)
   startedAt   DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateMeetingDto } from './dto/create-meeting.dto';
 import { UpdateMeetingDto } from './dto/update-meeting.dto';
 import { PrismaService } from 'src/services/prisma/prisma.service';
@@ -7,6 +11,7 @@ import { AddParticipantDto } from './dto/add-participant.dto';
 import { WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { WebsocketGateway } from 'src/services/websocket/websocket.gateway';
+import { AvailableRecognitionModel } from '@prisma/client';
 
 @Injectable()
 export class MeetingsService {
@@ -18,7 +23,7 @@ export class MeetingsService {
     private readonly prisma: PrismaService,
     private readonly websocketGateway: WebsocketGateway,
   ) {}
-  
+
   async create(userId: string, createMeetingDto: CreateMeetingDto) {
     // this.websocketGateway.ser
     console.log('userId', userId);
@@ -136,20 +141,18 @@ export class MeetingsService {
     const participant = await this.prisma.meetingParticipant.upsert({
       where: {
         userId_meetingId: {
-          userId: data.participantId, // User (participant) ID
-          meetingId: meeting.id, // Meeting ID
+          userId: data.participantId,
+          meetingId: meeting.id,
         },
       },
       update: {
-        // Update fields when participant exists
-        joinAt: new Date(), // Optionally update 'joinAt' to current time, or any other field
-        leftAt: null, // Optionally reset 'leftAt' when rejoining the meeting
+        joinAt: new Date(),
+        leftAt: null,
       },
       create: {
-        userId: data.participantId, // User (participant) ID
-        // meetingId: data.meetingId, // Meeting ID
-        meetingId: meeting.id, // Meeting ID
-        joinAt: new Date(), // Set 'joinAt' to current time on creation
+        userId: data.participantId,
+        meetingId: meeting.id,
+        joinAt: new Date(),
       },
     });
 
@@ -267,8 +270,7 @@ export class MeetingsService {
     if (newStatus) {
       // Start the recognition interval
       this.recognitionIntervals[meetingCode] = setInterval(() => {
-        if(this.websocketGateway.server){
-
+        if (this.websocketGateway.server) {
           this.websocketGateway.server
             .to(`student-${meetingCode}`)
             .emit('RECOGNITION_STATUS', 'started');
@@ -280,7 +282,7 @@ export class MeetingsService {
         clearInterval(this.recognitionIntervals[meetingCode]);
         delete this.recognitionIntervals[meetingCode];
 
-        if(this.websocketGateway.server){
+        if (this.websocketGateway.server) {
           this.websocketGateway.server
             .to(`student-${meetingCode}`)
             .emit('RECOGNITION_STATUS', 'stopped');
@@ -298,16 +300,16 @@ export class MeetingsService {
     const meeting = await this.prisma.meeting.findUnique({
       where: { meetingCode },
     });
-  
+
     if (!meeting) {
       throw new NotFoundException('Meeting not found');
     }
-  
+
     // Check if recognition is already started
     if (meeting.isRecognitionStarted) {
       throw new BadRequestException('Recognition is already started');
     }
-  
+
     // Update meeting status in the database
     const updatedMeeting = await this.prisma.meeting.update({
       where: { meetingCode },
@@ -316,7 +318,7 @@ export class MeetingsService {
         isRecognitionEnded: false,
       },
     });
-  
+
     // Start the recognition interval
     this.recognitionIntervals[meetingCode] = setInterval(() => {
       console.log(`Emitting RECOGNITION_STATUS at ${new Date().toISOString()}`);
@@ -327,7 +329,7 @@ export class MeetingsService {
           .emit('RECOGNITION_STATUS', 'started');
       }
     }, 5000);
-  
+
     return createSuccessResponse({
       data: updatedMeeting,
       message: 'Recognition enabled',
@@ -338,16 +340,16 @@ export class MeetingsService {
     const meeting = await this.prisma.meeting.findUnique({
       where: { meetingCode },
     });
-  
+
     if (!meeting) {
       throw new NotFoundException('Meeting not found');
     }
-  
+
     // Check if recognition is already stopped
     if (!meeting.isRecognitionStarted) {
       throw new BadRequestException('Recognition is already stopped');
     }
-  
+
     // Update meeting status in the database
     const updatedMeeting = await this.prisma.meeting.update({
       where: { meetingCode },
@@ -356,22 +358,56 @@ export class MeetingsService {
         isRecognitionEnded: true,
       },
     });
-  
+
     // Clear the interval if it exists
     if (this.recognitionIntervals[meetingCode]) {
       clearInterval(this.recognitionIntervals[meetingCode]);
       delete this.recognitionIntervals[meetingCode];
-  
+
       if (this.websocketGateway.server) {
         this.websocketGateway.server
           .to(`student-${meetingCode}`)
           .emit('RECOGNITION_STATUS', 'stopped');
       }
     }
-  
+
     return createSuccessResponse({
       data: updatedMeeting,
       message: 'Recognition disabled',
+    });
+  }
+
+  async selectRecognitionModel(meetingCode: string, data: any) {
+    const recognitionModelMap = {
+      0: AvailableRecognitionModel.NONE,
+      1: AvailableRecognitionModel.FACE_API,
+      2: AvailableRecognitionModel.EMOVALARO,
+    };
+    // Find the meeting
+    const meeting = await this.prisma.meeting.findUnique({
+      where: { meetingCode },
+    });
+
+    if (!meeting) {
+      throw new NotFoundException('Meeting not found');
+    }
+
+    const selectedModel = recognitionModelMap[data.RecognitionModel];
+    if (selectedModel === undefined) {
+      throw new BadRequestException('Invalid recognition model');
+    }
+
+    // Update meeting status in the database
+    const updatedMeeting = await this.prisma.meeting.update({
+      where: { meetingCode },
+      data: {
+        selectedRecognitionModel: selectedModel,
+      },
+    });
+
+    return createSuccessResponse({
+      data: updatedMeeting,
+      message: 'Recognition model selected',
     });
   }
 
@@ -490,8 +526,28 @@ export class MeetingsService {
     };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} meeting`;
+  async remove(id: string) {
+    // return `This action removes a #${id}/ meeting`;
+    const findMeeting = await this.prisma.meeting.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!findMeeting) {
+      throw new NotFoundException('Meeting not found');
+    }
+
+    await this.prisma.meeting.delete({
+      where: {
+        id: id,
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Meeting deleted successfully',
+    };
   }
 
   async getMeetingsByUserId(userId: string) {
