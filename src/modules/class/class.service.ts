@@ -85,7 +85,7 @@ export class ClassService {
         where: {
           userId,
         },
-        include:{
+        include: {
           user: {
             select: {
               fullname: true,
@@ -93,7 +93,7 @@ export class ClassService {
               avatar: true,
             },
           },
-        }
+        },
       });
 
       return createSuccessFetchResponse({
@@ -141,14 +141,13 @@ export class ClassService {
       },
       include: {
         user: {
-          select:{
+          select: {
             fullname: true,
             email: true,
             avatar: true,
-          }
+          },
         },
       },
-      
     });
 
     if (!classes) {
@@ -167,9 +166,9 @@ export class ClassService {
       where: {
         id,
       },
-      include:{
+      include: {
         meetings: true,
-      }
+      },
     });
 
     if (!findClass) {
@@ -180,7 +179,7 @@ export class ClassService {
       success: true,
       message: 'Class fetched successfully',
       data: findClass,
-    }
+    };
     // return `This action returns a #${id} class`;
   }
 
@@ -188,7 +187,7 @@ export class ClassService {
     const findClass = await this.prisma.class.findUnique({
       where: {
         id,
-      }
+      },
     });
 
     if (!findClass) {
@@ -205,10 +204,31 @@ export class ClassService {
     return {
       message: 'Class updated successfully',
       data: updateClass,
-    }
+    };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} class`;
+  async remove(id: string) {
+    // return `This action removes a #${id} class`;
+    const findClass = await this.prisma.class.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!findClass) {
+      throw new NotFoundException('Class not found');
+    }
+
+    await this.prisma.class.delete({
+      where: {
+        id,
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Class deleted successfully',
+      // data: deleteClass,
+    };
   }
 }
