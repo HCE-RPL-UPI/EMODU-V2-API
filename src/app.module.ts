@@ -13,9 +13,13 @@ import { FeedbacksModule } from './modules/feedbacks/feedbacks.module';
 import { WebsocketGateway } from './services/websocket/websocket.gateway';
 import { AffectiveInterventionTextModule } from './modules/affective-intervention-text/affective-intervention-text.module';
 import { ValenceArousalModule } from './modules/valence-arousal/valence-arousal.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     AuthModule,
     ClassModule,
     UsersModule,
