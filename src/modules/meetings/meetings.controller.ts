@@ -11,10 +11,12 @@ import {
 } from '@nestjs/common';
 import { MeetingsService } from './meetings.service';
 import { CreateMeetingDto } from './dto/create-meeting.dto';
-import { UpdateMeetingDto } from './dto/update-meeting.dto';
+import { SelectRecognitionModelDto, UpdateMeetingDto } from './dto/update-meeting.dto';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiOperation,
+  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -88,6 +90,17 @@ export class MeetingsController {
     return this.meetingsService.stopRecognition(meetingCode);
   }
 
+  @Patch('select-recognition-model/:meetingCode')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiParam({ name: 'meetingCode', required: true })
+  @ApiBody({ type: SelectRecognitionModelDto })
+  selectRecognitionModel(
+    @Param('meetingCode') meetingCode: string,
+    @Body() data: SelectRecognitionModelDto,
+  ) {
+    return this.meetingsService.selectRecognitionModel(meetingCode, data);
+  }
+
   // GET MEETING BY ID
   @Get(':id')
   @UseGuards(AuthGuard('jwt'))
@@ -115,7 +128,7 @@ export class MeetingsController {
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
   remove(@Param('id') id: string) {
-    return this.meetingsService.remove(+id);
+    return this.meetingsService.remove(id);
   }
 
   // GET MEETING BY MEET CODE
