@@ -19,9 +19,6 @@ export class AffectiveInterventionTextController {
 
   @Get('random')
   @UseGuards(AuthGuard('jwt'))
-  // @ApiQuery({ name: 'filter', required: false })
-  // @ApiQuery({ name: 'category', required: false })
-  // @ApiQuery({ name: 'name', required: false })
   async getRandomAffectiveInterventionText(
     @Request() req,
     @Query('emotion') emotion?: string,

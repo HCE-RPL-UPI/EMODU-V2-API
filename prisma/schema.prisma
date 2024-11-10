@@ -33,6 +33,7 @@ model User {
   members       Member[]
   notifications Notification[]
   meetings      Meeting[]
+  valenceArousal ValenceArousal[]
 
   // emotion logs
   affectiveTextLogs AffectiveTextLog[]
@@ -252,6 +253,20 @@ model Notification {
   id      String  @id @default(uuid())
   message String
   isRead  Boolean @default(false)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ValenceArousal {
+  id        String   @id @default(uuid())
+  valence   Float
+  arousal   Float
+  emotionPercentages Float
+  emotion String
+  meetingCode String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

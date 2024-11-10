@@ -16,6 +16,7 @@ async function bootstrap() {
       'http://localhost:3000', // <-- development frontend
       'http://localhost:3001', // <-- development frontend
       'chrome-extension://lingiapgkicdbiacmldhkpnlocmoicif', // <-- chrome extension
+      'https://meet.google.com', // <-- google meet
     ]
   });
   app.useGlobalPipes(new ValidationPipe());
