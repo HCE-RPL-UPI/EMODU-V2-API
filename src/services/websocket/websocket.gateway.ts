@@ -12,7 +12,8 @@ import { Server, Socket } from 'socket.io';
     origin: [
       'http://localhost:3000', // <-- development frontend
       'http://localhost:3001', // <-- development frontend
-      'chrome-extension://lingiapgkicdbiacmldhkpnlocmoicif', // <-- chrome extension
+      'chrome-extension://lingiapgkicdbiacmldhkpnlocmoicif', // <-- chrome extension dev
+      'chrome-extension://inmlgdoojpdklkanokddcgdkdacaekbp', // <-- chrome extension prod
       'https://meet.google.com', // <-- google meet
       'https://emodu-v2.vercel.app', // <-- production frontend
     ], // Configure CORS options here
