@@ -13,6 +13,8 @@ import { Server, Socket } from 'socket.io';
       'http://localhost:3000', // <-- development frontend
       'http://localhost:3001', // <-- development frontend
       'chrome-extension://lingiapgkicdbiacmldhkpnlocmoicif', // <-- chrome extension
+      'https://meet.google.com', // <-- google meet
+      'https://emodu-v2.vercel.app', // <-- production frontend
     ], // Configure CORS options here
     credentials : true
   },
