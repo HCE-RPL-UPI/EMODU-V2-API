@@ -17,6 +17,7 @@ async function bootstrap() {
       'http://localhost:3001', // <-- development frontend
       'chrome-extension://lingiapgkicdbiacmldhkpnlocmoicif', // <-- chrome extension
       'https://meet.google.com', // <-- google meet
+      'emodu-v2.vercel.app', // <-- production frontend
     ]
   });
   app.useGlobalPipes(new ValidationPipe());
