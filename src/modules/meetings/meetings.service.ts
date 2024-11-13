@@ -450,13 +450,47 @@ export class MeetingsService {
     console.log('meeting', meeting);
 
     if (!meeting) {
-      throw new NotFoundException('Meeting not foundsss');
+      throw new NotFoundException('Meeting not found');
     }
+
+    const participantsWithRecognitions = await Promise.all(
+      meeting.participants.map(async (participant) => {
+        const aggregatedRecognition = await this.prisma.recognition.aggregate({
+          _avg: {
+            angry: true,
+            disgusted: true,
+            fearful: true,
+            happy: true,
+            neutral: true,
+            sad: true,
+            surprised: true,
+          },
+        });
+
+        return {
+          ...participant,
+          recognition: aggregatedRecognition,
+        };
+      }),
+    );
+    // const recognitions = await this.prisma.recognition.findMany({
+    //   where: {
+    //     userId: participant.user.id,
+    //   },
+    //   select: {
+    //     predict: true,
+    //   },
+    // });
+
+    // Aggregate the predict values (e.g., concatenate them)
 
     return {
       success: true,
       message: 'Meeting fetched successfully',
-      data: meeting,
+      data: {
+        ...meeting,
+        participants: participantsWithRecognitions,
+      },
     };
     // return this.prisma.meeting.findUnique({
     //   where: {

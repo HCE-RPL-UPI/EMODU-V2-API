@@ -6,9 +6,12 @@ import { CreateValaroDto } from './dto/create-valaro.dto';
 export class ValenceArousalService {
   constructor(private prisma: PrismaService) {}
 
-  async getAll() {
-    // return await this.prisma.valenceArousal.findMany();
+  async getAll(page: number, limit: number) {
+    const offset = (page - 1) * limit;
+
     const data = await this.prisma.valenceArousal.findMany({
+      skip: offset,
+      take: limit,
       include: {
         user: {
           select: {
@@ -19,15 +22,27 @@ export class ValenceArousalService {
         },
       },
     });
+
+    const totalCount = await this.prisma.valenceArousal.count();
+
     return {
       success: true,
+      pagination: {
+        totalItems: totalCount,
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+      },
       message: 'Get all valence arousal success',
       data,
+      
     };
   }
 
-  async getByUser(userId: string) {
+  async getByUser(userId: string, page: number, limit: number) {
+    const offset = (page - 1) * limit;
     const data = await this.prisma.valenceArousal.findMany({
+      skip: offset,
+      take: limit,
       where: {
         userId,
       },
@@ -41,8 +56,20 @@ export class ValenceArousalService {
         },
       },
     });
+
+    const totalCount = await this.prisma.valenceArousal.count({
+      where: {
+        userId,
+      },
+    });
     return {
       success: true,
+      pagination: {
+        totalItems: totalCount,
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+        pageLeft: Math.ceil(totalCount / limit) - page > 0 ? Math.ceil(totalCount / limit) - page : 0,
+      },
       message: 'Get valence arousal by user success',
       data,
     };

@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ValenceArousalService } from './valence-arousal.service';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateValaroDto } from './dto/create-valaro.dto';
 
@@ -15,9 +15,16 @@ export class ValenceArousalController {
   @ApiOperation({ 
     summary: 'Get valence arousal',
     description: 'Get all valence arousal data',
-   })
-  getValenceArousal() {
-    return this.valenceArousalService.getAll();
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  getValenceArousal(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',  
+  ) {
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);   
+     return this.valenceArousalService.getAll(pageNumber, limitNumber);
   }
 
   @Get('user/:userId')
@@ -26,9 +33,16 @@ export class ValenceArousalController {
     summary: 'Get valence arousal by user',
     description: 'Get all valence arousal data by user',
    })
-  getValenceArousalByUser(@Param('userId') userId: string) {
-
-    return this.valenceArousalService.getByUser(userId);
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  getValenceArousalByUser(
+    @Param('userId') userId: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+  ) {
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+    return this.valenceArousalService.getByUser(userId, pageNumber, limitNumber);
   }
 
   @Post('create')

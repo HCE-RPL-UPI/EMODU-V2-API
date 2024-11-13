@@ -147,6 +147,20 @@ export class ClassService {
             avatar: true,
           },
         },
+        members: {
+          select: {
+            role: true,
+            userId: true,
+            joinAt: true,
+            user: {
+              select: {
+                fullname: true,
+                email: true,
+                avatar: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -168,6 +182,20 @@ export class ClassService {
       },
       include: {
         meetings: true,
+        members: {
+          select:{
+            role: true,
+            userId: true,
+            joinAt: true,
+            user: {
+              select: {
+                fullname: true,
+                email: true,
+                avatar: true,
+              },
+            },
+          }
+        },
       },
     });
 
