@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -14,12 +14,16 @@ import { WebsocketGateway } from './services/websocket/websocket.gateway';
 import { AffectiveInterventionTextModule } from './modules/affective-intervention-text/affective-intervention-text.module';
 import { ValenceArousalModule } from './modules/valence-arousal/valence-arousal.module';
 import { ConfigModule } from '@nestjs/config';
+import { AuditLogMiddleware } from './middlewares/audit-log.middleware';
+import { APP_FILTER } from '@nestjs/core';
+import { AllExceptionsFilter } from './filters/all-exception.filter';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
     AuthModule,
     ClassModule,
     UsersModule,
@@ -31,6 +35,19 @@ import { ConfigModule } from '@nestjs/config';
     ValenceArousalModule,
   ],
   controllers: [AppController],
-  providers: [AppService, PrismaService, GoogleSheetService, WebsocketGateway],
+  providers: [
+    AppService,
+    PrismaService,
+    GoogleSheetService,
+    WebsocketGateway,
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
+  ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuditLogMiddleware).forRoutes('*');
+  }
+}

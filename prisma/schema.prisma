@@ -25,14 +25,14 @@ model User {
   updatedAt         DateTime @updatedAt
 
   // avatar
-  medias        Media[]
-  classes       Class[]
-  recognitions  Recognition[]
-  comments      Comment[]
-  participants  MeetingParticipant[]
-  members       Member[]
-  notifications Notification[]
-  meetings      Meeting[]
+  medias         Media[]
+  classes        Class[]
+  recognitions   Recognition[]
+  comments       Comment[]
+  participants   MeetingParticipant[]
+  members        Member[]
+  notifications  Notification[]
+  meetings       Meeting[]
   valenceArousal ValenceArousal[]
 
   // emotion logs
@@ -40,17 +40,16 @@ model User {
 }
 
 model AffectiveTextLog {
-  id     Int    @id @default(autoincrement())
-  textId Int
-  text  String
-  emotionId Int
-  emotion EmotionEnum
-  category String
+  id           Int         @id @default(autoincrement())
+  textId       Int
+  text         String
+  emotionId    Int
+  emotion      EmotionEnum
+  category     String
   emotionValue Float
 
   createdAt DateTime @default(now())
-  
-  
+
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -65,7 +64,7 @@ enum EmotionEnum {
 }
 
 model Emotion {
-  id      Int                 @id @default(autoincrement())
+  id      Int         @id @default(autoincrement())
   emotion EmotionEnum
 
   interventions AffectiveInterventionTextARCS[]
@@ -81,7 +80,7 @@ model AffectiveInterventionTextARCS {
   positive     Boolean? @default(false)
   negative     Boolean? @default(false)
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
 
   emotionId Int
   emotion   Emotion @relation(fields: [emotionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -101,13 +100,13 @@ model Media {
 }
 
 model Class {
-  id          String   @id @default(uuid())
-  name        String
-  description String
-  classCode   String   @unique
+  id                 String   @id @default(uuid())
+  name               String
+  description        String
+  classCode          String   @unique
   defaultMeetingLink String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   // user
   userId String
@@ -125,20 +124,20 @@ enum AvailableRecognitionModel {
 }
 
 model Meeting {
-  id          String   @id @default(uuid())
-  meetingCode String  @unique
-  name        String
-  subject     String
-  description String
-  link        String
-  isStarted   Boolean  @default(false)
-  isRecognitionStarted Boolean @default(false)
-  isRecognitionEnded   Boolean @default(false)
-  isEnded     Boolean  @default(false)
+  id                       String                    @id @default(uuid())
+  meetingCode              String                    @unique
+  name                     String
+  subject                  String
+  description              String
+  link                     String
+  isStarted                Boolean                   @default(false)
+  isRecognitionStarted     Boolean                   @default(false)
+  isRecognitionEnded       Boolean                   @default(false)
+  isEnded                  Boolean                   @default(false)
   selectedRecognitionModel AvailableRecognitionModel @default(NONE)
-  startedAt   DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  startedAt                DateTime?
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
 
   createdBy String
   user      User   @relation(fields: [createdBy], references: [id], onDelete: Cascade)
@@ -259,15 +258,26 @@ model Notification {
 }
 
 model ValenceArousal {
-  id        String   @id @default(uuid())
-  valence   Float
-  arousal   Float
+  id                 String   @id @default(uuid())
+  valence            Float
+  arousal            Float
   emotionPercentages Float
-  emotion String
-  meetingCode String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  emotion            String
+  meetingCode        String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  action        String
+  tableName     String?
+  recordId      String?
+  userId        String?
+  timestamp     DateTime @default(now())
+  changes       Json?
+  errorMessages String?
 }
