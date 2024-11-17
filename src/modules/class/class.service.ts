@@ -93,6 +93,11 @@ export class ClassService {
               avatar: true,
             },
           },
+          meetings: {
+            select: {
+              _count: true,
+            },
+          },
         },
       });
 
@@ -161,6 +166,12 @@ export class ClassService {
             },
           },
         },
+        meetings: {
+          select: {
+            name: true,
+            meetingCode: true,
+          }
+        },
       },
     });
 
@@ -183,7 +194,7 @@ export class ClassService {
       include: {
         meetings: true,
         members: {
-          select:{
+          select: {
             role: true,
             userId: true,
             joinAt: true,
@@ -194,7 +205,7 @@ export class ClassService {
                 avatar: true,
               },
             },
-          }
+          },
         },
       },
     });

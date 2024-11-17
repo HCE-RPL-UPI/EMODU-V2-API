@@ -45,6 +45,32 @@ export class ValenceArousalController {
     return this.valenceArousalService.getByUser(userId, pageNumber, limitNumber);
   }
 
+  // @Get(':meetingCode')
+  // @UseGuards(AuthGuard('jwt'))
+  // @ApiOperation({ 
+  //   summary: 'Get valence arousal by meeting code',
+  //   description: 'Get all valence arousal data by meeting code',
+  //  })
+  // @ApiQuery({ name: 'page', required: false, type: Number })
+  // @ApiQuery({ name: 'limit', required: false, type: Number })
+  // getValenceArousalByMeetingCode(
+  //   @Param('meetingCode') meetingCode: string,
+  //   @Query('page') page: string = '1',
+  //   @Query('limit') limit: string = '10',
+  // ) {
+  //   console.log(meetingCode);
+  //   // const pageNumber = parseInt(page, 10);
+  //   // const limitNumber = parseInt(limit, 10);
+  //   return this.valenceArousalService.getAnalyticsByMeetingCode(meetingCode);
+  // }
+
+  @Get('analytics')
+  @UseGuards(AuthGuard('jwt'))
+  getAnalytics(@Query('meetingCode') meetingCode?: string) {
+    console.log(meetingCode);
+    return this.valenceArousalService.getAnalytics(meetingCode);
+  }
+
   @Post('create')
   @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ 
