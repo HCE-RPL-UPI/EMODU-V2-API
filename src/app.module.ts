@@ -14,6 +14,7 @@ import { WebsocketGateway } from './services/websocket/websocket.gateway';
 import { AffectiveInterventionTextModule } from './modules/affective-intervention-text/affective-intervention-text.module';
 import { ValenceArousalModule } from './modules/valence-arousal/valence-arousal.module';
 import { ConfigModule } from '@nestjs/config';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ConfigModule } from '@nestjs/config';
     FeedbacksModule,
     AffectiveInterventionTextModule,
     ValenceArousalModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, GoogleSheetService, WebsocketGateway],
