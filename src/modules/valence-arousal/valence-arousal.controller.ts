@@ -45,6 +45,17 @@ export class ValenceArousalController {
     return this.valenceArousalService.getByUser(userId, pageNumber, limitNumber);
   }
 
+  @Get('export-csv-all/user')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ 
+    summary: 'Export valence arousal data by user to CSV',
+   })
+  exportCsvAllByUser() {
+    // return this.valenceArousalService.exportCsvAllByUser();
+  }
+
+  
+
   // @Get(':meetingCode')
   // @UseGuards(AuthGuard('jwt'))
   // @ApiOperation({ 
@@ -66,10 +77,30 @@ export class ValenceArousalController {
 
   @Get('analytics')
   @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({
+    summary: 'Get valence arousal analytics by meeting code',
+    description: 'Get all valence arousal analytics data by meeting code',
+  })
   getAnalytics(@Query('meetingCode') meetingCode?: string) {
     console.log(meetingCode);
     return this.valenceArousalService.getAnalytics(meetingCode);
   }
+
+  // get analytics by user
+  @Get('analytics/user')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({
+    summary: 'Get valence arousal analytics by user in a meeting',
+  })
+  getAnalyticsByUser(
+    @Query('userId') userId?: string,
+    @Query('meetingCode') meetingCode?: string
+  ) {
+    console.log(userId);
+    return this.valenceArousalService.getAnalyticsByUserAndMeetingCode(userId, meetingCode);
+  }
+
+
 
   @Post('create')
   @UseGuards(AuthGuard('jwt'))

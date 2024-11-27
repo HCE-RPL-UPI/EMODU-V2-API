@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Param, Post, Req, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, Request, Res, UseGuards } from '@nestjs/common';
 import { RecognitionsService } from './recognitions.service';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { createRecognitionDto } from './dto/create-recognition.dto';
+import { Response } from 'express';
 
-@ApiTags('Recognitions Service')
+@ApiTags('Recognitions Service(Face-Api.js)')
 @ApiBearerAuth()
 @Controller('recognition')
 export class RecognitionsController {
@@ -56,6 +57,49 @@ export class RecognitionsController {
    })
   getRecognitionsByMeetingCode(@Param('meetingCode') meetingCode: string, @Param('limit') limit: number) {
     return this.recognitionsService.getRecognitionsByMeetingCode(meetingCode, limit);
+  }
+
+  @Get('export/csv')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Export recognitions data to CSV' })
+  async exportRecognitionsToCSV(@Res() res: Response): Promise<void> {
+    try {
+      const filePath =  (await this.recognitionsService.exportRecognitionsToCSV()).filePath;
+      const fileName =  (await this.recognitionsService.exportRecognitionsToCSV()).fileName;
+
+      res.set({
+        'Content-Type': 'text/csv',
+        'Content-Disposition': `attachment; filename="${fileName}"`,
+      });
+
+      res.download(filePath, fileName, (err) => {
+        if (err) {
+          console.error('Error downloading file:', err);
+          // Only send error response if headers haven't been sent
+          if (!res.headersSent) {
+            res.status(500).send('Error downloading file');
+          }
+        }
+        // Clean up: delete the temporary file
+        require('fs').unlink(filePath, (unlinkErr) => {
+          if (unlinkErr) {
+            console.error('Error deleting temporary file:', unlinkErr);
+          }
+        });
+      });
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      if (!res.headersSent) {
+        res.status(500).send('Error generating CSV file');
+      }
+    }
+  }
+
+  @Get('export/csv/:meetingCode')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Export recognitions data to CSV by meeting code' })
+  async exportRecogntionsByMeetingCodeToCSV(@Query('meetingCode') meetingCode: string, @Res() res: Response): Promise<void> {
+    
   }
 
   // @Get('reports')

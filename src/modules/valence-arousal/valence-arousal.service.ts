@@ -52,7 +52,6 @@ export class ValenceArousalService {
       },
       message: 'Get all valence arousal success',
       data,
-      
     };
   }
 
@@ -61,7 +60,7 @@ export class ValenceArousalService {
     const data = await this.prisma.valenceArousal.findMany({
       skip: offset,
       take: limit,
-      orderBy:{
+      orderBy: {
         createdAt: 'desc',
       },
       where: {
@@ -89,16 +88,17 @@ export class ValenceArousalService {
         totalItems: totalCount,
         currentPage: page,
         totalPages: Math.ceil(totalCount / limit),
-        pageLeft: Math.ceil(totalCount / limit) - page > 0 ? Math.ceil(totalCount / limit) - page : 0,
+        pageLeft:
+          Math.ceil(totalCount / limit) - page > 0
+            ? Math.ceil(totalCount / limit) - page
+            : 0,
       },
       message: 'Get valence arousal by user success',
       data,
     };
   }
 
-  private async calculateValenceArousalAverage(meetingCode: string) {
-    
-  }
+  private async calculateValenceArousalAverage(meetingCode: string) {}
 
   async getAnalyticsByMeetingCode(meetingCode: string) {
     console.log('meetingCode', meetingCode);
@@ -121,7 +121,6 @@ export class ValenceArousalService {
         },
       },
     });
-    
 
     if (!data.length) {
       return {
@@ -137,10 +136,11 @@ export class ValenceArousalService {
         return {
           valence: acc.valence + (curr.valence || 0),
           arousal: acc.arousal + (curr.arousal || 0),
-          emotionPercentage: acc.emotionPercentage + (curr.emotionPercentages || 0),
+          emotionPercentage:
+            acc.emotionPercentage + (curr.emotionPercentages || 0),
         };
       },
-      { valence: 0, arousal: 0, emotionPercentage: 0 }
+      { valence: 0, arousal: 0, emotionPercentage: 0 },
     );
 
     // Calculate final averages
@@ -150,10 +150,13 @@ export class ValenceArousalService {
     const avgEmotionPercentage = averages.emotionPercentage / totalRecords;
 
     // Count emotions (similar to your frontend processData function)
-    const emotionCounts = data.reduce((acc, item) => {
-      acc[item.emotion] = (acc[item.emotion] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const emotionCounts = data.reduce(
+      (acc, item) => {
+        acc[item.emotion] = (acc[item.emotion] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     // Convert emotion counts to percentages
     const emotions = Object.entries(emotionCounts).map(([emotion, count]) => ({
@@ -162,7 +165,7 @@ export class ValenceArousalService {
     }));
 
     // Get unique users who participated
-    const uniqueUsers = [...new Set(data.map(item => item.user.id))];
+    const uniqueUsers = [...new Set(data.map((item) => item.user.id))];
 
     return {
       success: true,
@@ -215,12 +218,9 @@ export class ValenceArousalService {
   }
 
   async getAnalytics(meetingCode?: string): Promise<Root> {
-    console.log('meetingCode', meetingCode);
     try {
       // Base query to get all records
-      const baseQuery = meetingCode 
-        ? { where: { meetingCode } }
-        : {};
+      const baseQuery = meetingCode ? { where: { meetingCode } } : {};
 
       // Get all records
       // const records = await this.prisma.valenceArousal.findMany({
@@ -230,52 +230,62 @@ export class ValenceArousalService {
       //   },
       // });
       const records = await this.prisma.valenceArousal.findMany({
-        where:{
+        where: {
           meetingCode: meetingCode,
         },
-        include:{
+        include: {
           user: true,
-        }
-      })
+        },
+      });
 
       // Get total records count
       const totalRecords = records.length;
 
       // Get unique participants count
-      const uniqueParticipants = new Set(records.map(record => record.userId)).size;
+      const uniqueParticipants = new Set(records.map((record) => record.userId))
+        .size;
 
       // Group records by emotion
-      const emotionGroups = records.reduce((acc, record) => {
-        if (!acc[record.emotion]) {
-          acc[record.emotion] = {
-            count: 0,
-            totalValence: 0,
-            totalArousal: 0,
-            totalEmotionPercentage: 0,
-          };
-        }
-        
-        acc[record.emotion].count += 1;
-        acc[record.emotion].totalValence += record.valence;
-        acc[record.emotion].totalArousal += record.arousal;
-        acc[record.emotion].totalEmotionPercentage += record.emotionPercentages;
-        
-        return acc;
-      }, {} as Record<string, {
-        count: number;
-        totalValence: number;
-        totalArousal: number;
-        totalEmotionPercentage: number;
-      }>);
+      const emotionGroups = records.reduce(
+        (acc, record) => {
+          if (!acc[record.emotion]) {
+            acc[record.emotion] = {
+              count: 0,
+              totalValence: 0,
+              totalArousal: 0,
+              totalEmotionPercentage: 0,
+            };
+          }
+
+          acc[record.emotion].count += 1;
+          acc[record.emotion].totalValence += record.valence;
+          acc[record.emotion].totalArousal += record.arousal;
+          acc[record.emotion].totalEmotionPercentage +=
+            record.emotionPercentages;
+
+          return acc;
+        },
+        {} as Record<
+          string,
+          {
+            count: number;
+            totalValence: number;
+            totalArousal: number;
+            totalEmotionPercentage: number;
+          }
+        >,
+      );
 
       // Calculate averages and percentages for each emotion
-      const emotions: Emotion[] = Object.entries(emotionGroups).map(([emotion, data]) => ({
-        emotion,
-        percentage: (data.count / totalRecords) * 100,
-        emotionPercentage: data.totalEmotionPercentage / data.count,
-        valence: data.totalValence / data.count,
-        arousal: data.totalArousal / data.count,
-      }));
+      const emotions: Emotion[] = Object.entries(emotionGroups).map(
+        ([emotion, data]) => ({
+          emotion,
+          percentage: (data.count / totalRecords) * 100,
+          emotionPercentage: data.totalEmotionPercentage / data.count,
+          valence: data.totalValence / data.count,
+          arousal: data.totalArousal / data.count,
+        }),
+      );
 
       // Sort emotions by percentage in descending order
       emotions.sort((a, b) => b.percentage - a.percentage);
@@ -287,6 +297,90 @@ export class ValenceArousalService {
           emotions,
           totalRecords,
           uniqueParticipants,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to retrieve analytics: ${error.message}`,
+        data: {
+          emotions: [],
+          totalRecords: 0,
+          uniqueParticipants: 0,
+        },
+      };
+    }
+  }
+
+  async getAnalyticsByUserAndMeetingCode(
+    userId?: string,
+    meetingCode?: string,
+  ) {
+    try {
+      // const baseQuery = userId
+
+      const records = await this.prisma.valenceArousal.findMany({
+        where: {
+          meetingCode,
+          userId,
+        },
+        include: {
+          user: true,
+        },
+      });
+
+      const totalRecords = records.length;
+
+      const emotionGroups = records.reduce(
+        (acc, record) => {
+          if (!acc[record.emotion]) {
+            acc[record.emotion] = {
+              count: 0,
+              totalValence: 0,
+              totalArousal: 0,
+              totalEmotionPercentage: 0,
+            };
+          }
+
+          acc[record.emotion].count += 1;
+          acc[record.emotion].totalValence += record.valence;
+          acc[record.emotion].totalArousal += record.arousal;
+          acc[record.emotion].totalEmotionPercentage +=
+            record.emotionPercentages;
+
+          return acc;
+        },
+        {} as Record<
+          string,
+          {
+            count: number;
+            totalValence: number;
+            totalArousal: number;
+            totalEmotionPercentage: number;
+          }
+        >,
+      );
+
+      // Calculate averages and percentages for each emotion
+      const emotions: Emotion[] = Object.entries(emotionGroups).map(
+        ([emotion, data]) => ({
+          emotion,
+          percentage: (data.count / totalRecords) * 100,
+          emotionPercentage: data.totalEmotionPercentage / data.count,
+          valence: data.totalValence / data.count,
+          arousal: data.totalArousal / data.count,
+        }),
+      );
+
+      // Sort emotions by percentage in descending order
+      emotions.sort((a, b) => b.percentage - a.percentage);
+
+      return {
+        success: true,
+        message: 'Analytics retrieved successfully',
+        data: {
+          emotions,
+          totalRecords,
         },
       };
     } catch (error) {
@@ -325,38 +419,48 @@ export class ValenceArousalService {
 
       // Reuse the same logic as getAnalytics
       const totalRecords = records.length;
-      const uniqueParticipants = new Set(records.map(record => record.userId)).size;
+      const uniqueParticipants = new Set(records.map((record) => record.userId))
+        .size;
 
-      const emotionGroups = records.reduce((acc, record) => {
-        if (!acc[record.emotion]) {
-          acc[record.emotion] = {
-            count: 0,
-            totalValence: 0,
-            totalArousal: 0,
-            totalEmotionPercentage: 0,
-          };
-        }
-        
-        acc[record.emotion].count += 1;
-        acc[record.emotion].totalValence += record.valence;
-        acc[record.emotion].totalArousal += record.arousal;
-        acc[record.emotion].totalEmotionPercentage += record.emotionPercentages;
-        
-        return acc;
-      }, {} as Record<string, {
-        count: number;
-        totalValence: number;
-        totalArousal: number;
-        totalEmotionPercentage: number;
-      }>);
+      const emotionGroups = records.reduce(
+        (acc, record) => {
+          if (!acc[record.emotion]) {
+            acc[record.emotion] = {
+              count: 0,
+              totalValence: 0,
+              totalArousal: 0,
+              totalEmotionPercentage: 0,
+            };
+          }
 
-      const emotions: Emotion[] = Object.entries(emotionGroups).map(([emotion, data]) => ({
-        emotion,
-        percentage: (data.count / totalRecords) * 100,
-        emotionPercentage: data.totalEmotionPercentage / data.count,
-        valence: data.totalValence / data.count,
-        arousal: data.totalArousal / data.count,
-      })).sort((a, b) => b.percentage - a.percentage);
+          acc[record.emotion].count += 1;
+          acc[record.emotion].totalValence += record.valence;
+          acc[record.emotion].totalArousal += record.arousal;
+          acc[record.emotion].totalEmotionPercentage +=
+            record.emotionPercentages;
+
+          return acc;
+        },
+        {} as Record<
+          string,
+          {
+            count: number;
+            totalValence: number;
+            totalArousal: number;
+            totalEmotionPercentage: number;
+          }
+        >,
+      );
+
+      const emotions: Emotion[] = Object.entries(emotionGroups)
+        .map(([emotion, data]) => ({
+          emotion,
+          percentage: (data.count / totalRecords) * 100,
+          emotionPercentage: data.totalEmotionPercentage / data.count,
+          valence: data.totalValence / data.count,
+          arousal: data.totalArousal / data.count,
+        }))
+        .sort((a, b) => b.percentage - a.percentage);
 
       return {
         success: true,

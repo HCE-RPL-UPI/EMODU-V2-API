@@ -2,6 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/services/prisma/prisma.service';
 import { WebsocketGateway } from 'src/services/websocket/websocket.gateway';
 import { createRecognitionDto } from './dto/create-recognition.dto';
+import { join } from 'path';
+
+import { createObjectCsvWriter } from 'csv-writer';
 
 @Injectable()
 export class RecognitionsService {
@@ -100,12 +103,14 @@ export class RecognitionsService {
       // take: limit,
     });
 
-    const recognitionsOverview = await this.calculateEmotionsAverage(meetingCode);
-    const recognitionsSummary = await this.calculatePositiveNegative(meetingCode);
+    const recognitionsOverview =
+      await this.calculateEmotionsAverage(meetingCode);
+    const recognitionsSummary =
+      await this.calculatePositiveNegative(meetingCode);
 
     const responseData = {
       recognitionStream: recognitionDetails,
-      recognitionsOverview,  // This will now be in the desired format
+      recognitionsOverview, // This will now be in the desired format
       recognitionsSummary: {
         labels: ['Positive', 'Negative'],
         datas: Object.values(recognitionsSummary || {}),
@@ -126,9 +131,9 @@ export class RecognitionsService {
       message: 'Recognition data fetched successfully',
       data: responseData,
     };
-}
+  }
 
-private async calculateEmotionsAverage(meetingCode: string) {
+  private async calculateEmotionsAverage(meetingCode: string) {
     const emotions = await this.prisma.recognition.groupBy({
       by: ['meetingCode'],
       where: { meetingCode },
@@ -162,7 +167,7 @@ private async calculateEmotionsAverage(meetingCode: string) {
         'Angry',
         'Fearful',
         'Disgusted',
-        'Surprised'
+        'Surprised',
       ],
       datas: [
         Math.round(averages.neutral * 100),
@@ -172,10 +177,9 @@ private async calculateEmotionsAverage(meetingCode: string) {
         Math.round(averages.fearful * 100),
         Math.round(averages.disgusted * 100),
         Math.round(averages.surprised * 100),
-      ]
+      ],
     };
-}
-  
+  }
 
   // private async calculateEmotionsAverage(meetingCode: string) {
   //   const emotions = await this.prisma.recognition.groupBy({
@@ -398,5 +402,82 @@ private async calculateEmotionsAverage(meetingCode: string) {
     };
 
     return formattedData;
+  }
+
+  private getSampleData(): any {
+    return [
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        createdAt: new Date(),
+      },
+      {
+        id: 2,
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+        createdAt: new Date(),
+      },
+      {
+        id: 3,
+        name: 'Bob Johnson',
+        email: 'bob@example.com',
+        createdAt: new Date(),
+      },
+    ];
+  }
+
+  async exportRecognitionsToCSV(): Promise<{ filePath: string; fileName: string }> {
+    try {
+      const data = this.getSampleData();
+      const fileName = `recognitions_${Date.now()}.csv`;
+      const filePath = join(process.cwd(), 'temp', fileName);
+
+      // Ensure temp directory exists
+      const tempDir = join(process.cwd(), 'temp');
+      if (!require('fs').existsSync(tempDir)) {
+        require('fs').mkdirSync(tempDir, { recursive: true });
+      }
+
+      const csvWriter = createObjectCsvWriter({
+        path: filePath,
+        header: [
+          { id: 'id', title: 'ID' },
+          { id: 'name', title: 'Name' },
+          { id: 'email', title: 'Email' },
+          { id: 'createdAt', title: 'Created At' },
+        ],
+      });
+
+      await csvWriter.writeRecords(data);
+
+      return { filePath, fileName };
+    } catch (error) {
+      console.error('Error generating CSV:', error);
+      throw new Error('Failed to generate CSV file');
+    }
+  }
+
+
+  async exportRecognitionsByMeetingCodeToCSV(meetingCode: string) {
+    try{
+      const data = await this.prisma.recognition.findMany({
+        where: { meetingCode },
+      })
+      const fileName = `recognitions_${meetingCode}_${Date.now()}.csv`;
+      const filePath = join(process.cwd(), 'temp', fileName);
+
+      // Ensure temp directory exists
+      const tempDir = join(process.cwd(), 'temp');
+      if (!require('fs').existsSync(tempDir)) {
+        require('fs').mkdirSync(tempDir, { recursive: true });
+      }
+
+      // const csvWriter = createObjectCsvWriter({
+      
+    }catch(error){
+      console.error('Error generating CSV:', error);
+      throw new Error('Failed to generate CSV file');
+    }
   }
 }
