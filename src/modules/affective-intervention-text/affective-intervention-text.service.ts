@@ -27,6 +27,7 @@ export class AffectiveInterventionTextService {
     name: string,
     emotionValue: number,
     user,
+    meetingCode?: string,
   ) {
     const userId = user.userId;
 
@@ -94,6 +95,7 @@ export class AffectiveInterventionTextService {
         userId,
         emotionMap,
         name,
+        meetingCode,
       );
     }
 
@@ -111,6 +113,7 @@ export class AffectiveInterventionTextService {
       userId,
       emotionMap,
       name,
+      meetingCode,
     );
 
   }
@@ -124,6 +127,7 @@ export class AffectiveInterventionTextService {
     userId: string,
     emotionMap: Record<string, number>,
     name: string,
+    meetingCode?: string,
   ) {
     if (!result) {
       throw new NotFoundException('No intervention text found');
@@ -143,6 +147,7 @@ export class AffectiveInterventionTextService {
         category,
         userId,
         emotionValue: +emotionValue,
+        meetingCode,
       },
     });
 

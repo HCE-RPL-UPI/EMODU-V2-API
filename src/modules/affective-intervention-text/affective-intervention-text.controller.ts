@@ -25,6 +25,7 @@ export class AffectiveInterventionTextController {
     @Query('category') category?: string,
     @Query('name') name?: string,
     @Query('emotionValue') emotionValue?: number,
+    @Query('meetingCode') meetingCode?: string,
   ) {
     const user = req.user;
     return await this.affectiveInterventionTextService.getRandomAffectiveInterventionText(
@@ -33,6 +34,7 @@ export class AffectiveInterventionTextController {
       name,
       emotionValue,
       user,
+      meetingCode,
     );
   }
 

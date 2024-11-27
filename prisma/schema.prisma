@@ -47,7 +47,7 @@ model AffectiveTextLog {
   emotion EmotionEnum
   category String
   emotionValue Float
-
+  meetingCode String?
   createdAt DateTime @default(now())
   
   
