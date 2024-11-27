@@ -191,29 +191,29 @@ export class ArcsService {
     const scores = await this.getScoresByEmail(email);
 
 
-    if (!scores['attentionPositive'].length) {
-      // throw new NotFoundException('Email not found');
+    // if (!scores['attentionPositive'].length) {
+    //   // throw new NotFoundException('Email not found');
 
-      return {
-        email,
-        attentionPositiveScore: 10,
-        attentionNegativeScore: 0,
-        relevancePositiveScore: 10,
-        relevanceNegativeScore: 0,
-        confidencePositiveScore: 10,
-        confidenceNegativeScore: 0,
-        satisfactionPositiveScore: 10,
-        satisfactionNegativeScore: 10,
-        totalPositiveScore: 50,
-        totalNegativeScore: 0,
-        result: 'positive',
-      };
+    //   return {
+    //     email,
+    //     attentionPositiveScore: 10,
+    //     attentionNegativeScore: 0,
+    //     relevancePositiveScore: 10,
+    //     relevanceNegativeScore: 0,
+    //     confidencePositiveScore: 10,
+    //     confidenceNegativeScore: 0,
+    //     satisfactionPositiveScore: 10,
+    //     satisfactionNegativeScore: 10,
+    //     totalPositiveScore: 50,
+    //     totalNegativeScore: 0,
+    //     result: 'positive',
+    //   };
 
-    }
-    // if(scores)
-    if (!scores) {
-      throw new NotFoundException('Email not found');
-    }
+    // }
+    // // if(scores)
+    // if (!scores) {
+    //   throw new NotFoundException('Email not found');
+    // }
     // console.log('scores', scores);
     let totalPositiveScore = 0;
     let totalNegativeScore = 0;
