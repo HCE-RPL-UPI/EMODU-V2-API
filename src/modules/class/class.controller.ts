@@ -22,6 +22,7 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { JoinClassDto } from './dto/join-class.dto';
+import { AddCoteacherDto } from './dto/add-coteacher.dto';
 
 @ApiTags('Class Services')
 @ApiBearerAuth()
@@ -31,6 +32,7 @@ export class ClassController {
 
   @Post('create')
   @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Create a class' })
   create(@Request() req, @Body() createClassDto: CreateClassDto) {
     const userId = req.user.userId;
     console.log(userId);
@@ -43,6 +45,7 @@ export class ClassController {
 
   @Post('join')
   @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Join a class' })
   joinClass(@Request() req, @Body() joinClassDto: JoinClassDto) {
     const userId: string = req.user.userId;
     const payload: JoinClassDto = {
@@ -67,19 +70,43 @@ export class ClassController {
 
   @Get(':id')
   @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({
+    summary: 'Get a class by id',
+    description: 'Get a class by id',
+  })
   findOne(@Param('id') id: string) {
     return this.classService.findOne(id);
   }
 
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Update a class' })
   update(@Param('id') id: string, @Body() updateClassDto: UpdateClassDto) {
     return this.classService.update(id, updateClassDto);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Remove a class' })
   remove(@Param('id') id: string) {
     return this.classService.remove(id);
   }
+
+  // add member as co-teacher/co-owner
+  @Patch('add-coteacher/:classId')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Add member of class as a co-teacher to a class' })
+  addCoTeacher(@Param('classId') classId: string, @Body() addCoteacherDto: AddCoteacherDto) {
+    // return this.classService.addCoTeacher(classId, userId);
+    return this.classService.addCoteacher(classId, addCoteacherDto.userId);
+  }
+
+  // remove member as co-teacher/co-owner
+  @Patch('remove-coteacher/:classId')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Remove member of class as a co-teacher to a class' })
+  removeCoTeacher(@Param('classId') classId: string, @Body() addCoteacherDto: AddCoteacherDto) {
+    return this.classService.removeCoteacher(classId, addCoteacherDto.userId);
+  }
+
 }

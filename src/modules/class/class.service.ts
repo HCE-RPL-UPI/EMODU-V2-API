@@ -79,7 +79,6 @@ export class ClassService {
 
   async findAll(userId: string, filter?: string) {
     // filter by all, owned, joined
-    console.log(filter);
     if (filter === 'owned') {
       const ownedClasses = await this.prisma.class.findMany({
         where: {
@@ -144,6 +143,9 @@ export class ClassService {
           },
         },
       },
+      orderBy:{
+        createdAt : 'desc'
+      },
       include: {
         user: {
           select: {
@@ -154,6 +156,7 @@ export class ClassService {
         },
         members: {
           select: {
+            id: true,
             role: true,
             userId: true,
             joinAt: true,
@@ -268,6 +271,125 @@ export class ClassService {
       success: true,
       message: 'Class deleted successfully',
       // data: deleteClass,
+    };
+  }
+
+  async addCoteacher(classId: string, userId: string) {
+    const findClass = await this.prisma.class.findUnique({
+      where: {
+        id: classId,
+      },
+    });
+
+    if (!findClass) {
+      throw new NotFoundException('Class not found');
+    }
+
+    const findUser = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!findUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const checkMember = await this.prisma.member.findFirst({
+      where: {
+        userId,
+        classId,
+      },
+    });
+
+    if (!checkMember) {
+      throw new BadRequestException('User not joined the class');
+    }
+
+    const checkCoteacher = await this.prisma.member.findFirst({
+      where: {
+        userId,
+        classId,
+        role: 'TEACHER',
+      },
+    });
+
+    if (checkCoteacher) {
+      throw new BadRequestException('User already a co-teacher');
+    }
+
+    const addCoteacher = await this.prisma.member.update({
+      where: {
+        id: checkMember.id,
+      },
+      data: {
+        role: 'TEACHER',
+      },
+    });
+ 
+
+    return {
+      message: 'Co-teacher added successfully',
+      data: addCoteacher,
+    };
+  }
+
+  async removeCoteacher(classId: string, userId: string) {
+    const findClass = await this.prisma.class.findUnique({
+      where: {
+        id: classId,
+      },
+    });
+
+    if (!findClass) {
+      throw new NotFoundException('Class not found');
+    }
+
+    const findUser = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!findUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const checkMember = await this.prisma.member.findFirst({
+      where: {
+        userId,
+        classId,
+      },
+    });
+
+    if (!checkMember) {
+      throw new BadRequestException('User not joined the class');
+    }
+
+    const checkCoteacher = await this.prisma.member.findFirst({
+      where: {
+        userId,
+        classId,
+        role: 'TEACHER',
+      },
+    });
+
+    if (!checkCoteacher) {
+      throw new BadRequestException('User not a co-teacher');
+    }
+
+    const removeCoteacher = await this.prisma.member.update({
+      where: {
+        id: checkMember.id,
+      },
+      data: {
+        role: 'STUDENT',
+      },
+    });
+
+    return {
+      message: 'Co-teacher removed successfully',
+      data: removeCoteacher,
     };
   }
 }
