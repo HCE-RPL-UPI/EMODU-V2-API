@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import {  IsEmail, IsOptional, IsString } from "class-validator";
+import { ReinforcementTypeEnum } from "@prisma/client";
+import {  IsEmail, IsEnum, IsOptional, IsString } from "class-validator";
 
 export class UpdateUserDto {
     id: string;
@@ -32,4 +33,10 @@ export class ResetPasswordDto {
     @ApiProperty()
     @IsString()
     newPassword : string;
+}
+
+export class UpdateReinforcementTypeDto {
+    @ApiProperty()
+    @IsEnum(ReinforcementTypeEnum)
+    reinforcementType : ReinforcementTypeEnum;
 }
